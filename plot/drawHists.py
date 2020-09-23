@@ -134,7 +134,10 @@ def stackPlots(hists, SignalHists, Fnames, ch = "channel", reg = "region", year=
     pad1.SetLogy(ROOT.kFALSE)
 
     y_min=0
-    y_max=1.6*hists[0].GetMaximum()
+    if showData:
+       y_max=1.6*hists[0].GetMaximum()
+    else:
+       y_max=1.6*hs.GetStack().Last().GetMaximum()
     dummy.SetMarkerStyle(20)
     dummy.SetMarkerSize(1.2)
     dummy.SetTitle("")
@@ -144,6 +147,7 @@ def stackPlots(hists, SignalHists, Fnames, ch = "channel", reg = "region", year=
     dummy.GetYaxis().SetTitleSize(0.07)
     dummy.GetYaxis().SetLabelSize(0.04)
     dummy.GetYaxis().SetRangeUser(y_min,y_max)
+    dummy.GetYaxis().SetNoExponent()
     dummy.Draw("e")
     hs.Draw("histSAME")
     for H in SignalHists:
@@ -163,7 +167,7 @@ def stackPlots(hists, SignalHists, Fnames, ch = "channel", reg = "region", year=
     if (year == '2018'):
         Lumi = '59.97'
     label_cms="CMS Preliminary"
-    Label_cms = ROOT.TLatex(0.2,0.92,label_cms)
+    Label_cms = ROOT.TLatex(0.15,0.92,label_cms)
     Label_cms.SetNDC()
     Label_cms.SetTextFont(61)
     Label_cms.Draw()
@@ -334,7 +338,10 @@ for numyear, nameyear in enumerate(year):
                 for numvar, namevar in enumerate(variables):
                     h= Files[f].Get(namech + '_' + namereg + '_' + namevar)
                     h.SetFillColor(colors[f])
-                    h.SetLineColor(colors[f])
+                    if 'SMEFTfr' not in Samples[f]:
+                        h.SetLineColor(colors[0])
+                    else:
+                        h.SetLineColor(colors[f])
                     l3.append(h)
                 l2.append(l3)
             l1.append(l2)

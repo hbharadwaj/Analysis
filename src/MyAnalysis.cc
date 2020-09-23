@@ -619,7 +619,7 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
          if ((*mu_mc_index)[l]<0) muPtSFRochester = rc.kSmearMC((*mu_gt_charge)[l], (*mu_gt_pt)[l],(*mu_gt_eta)[l],(*mu_gt_phi)[l], (*mu_trackerLayersWithMeasurement)[l] , gRandom->Rndm(),0, 0);
       }
       if(muPtSFRochester * (*mu_gt_pt)[l] <20 || abs((*mu_gt_eta)[l]) > 2.4) continue;
-      if ((!(*mu_MvaMedium)[l]) || (!(*mu_CutBasedIdMedium)[l]))
+      if (!((*mu_MvaMedium)[l]&&(*mu_CutBasedIdMedium)[l])) continue;
       if((*mu_pfIsoDbCorrected04)[l] > 0.15) continue;
       selectedLeptons->push_back(new lepton_candidate(muPtSFRochester * (*mu_gt_pt)[l],(*mu_gt_eta)[l],(*mu_gt_phi)[l],(*mu_gt_charge)[l],l,10));
       selectedLeptons_copy->push_back(new lepton_candidate(muPtSFRochester * (*mu_gt_pt)[l],(*mu_gt_eta)[l],(*mu_gt_phi)[l],(*mu_gt_charge)[l],l,10));
