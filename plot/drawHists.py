@@ -96,7 +96,7 @@ def stackPlots(hists, SignalHists, Fnames, ch = "channel", reg = "region", year=
         hs.Add(hists[num])
 
     dummy = hists[0].Clone()
-    if ('emul' not in ch) or ('B' not in reg):
+    if ('emul' not in ch) or ('OnZ' in reg):
         showData = True
     else:
         showData = False
@@ -108,10 +108,26 @@ def stackPlots(hists, SignalHists, Fnames, ch = "channel", reg = "region", year=
     canvas.SetBottomMargin(0.17)
     canvas.cd()
 
-    legend = ROOT.TLegend(0.7,0.55,0.9,0.88)
+    if showData:
+       legend = ROOT.TLegend(0.7,0.74,0.82,0.88)
+    else:
+       legend = ROOT.TLegend(0.7,0.74,0.82,0.833)
     legend.SetBorderSize(0)
+    legend.SetFillStyle(0);
     legend.SetTextFont(42)
     legend.SetTextSize(0.04)
+    legend2 = ROOT.TLegend(0.82,0.74,0.94,0.88)
+    legend2.SetBorderSize(0)
+    legend2.SetFillStyle(0);
+    legend2.SetTextFont(42)
+    legend2.SetTextSize(0.04)
+    legend3 = ROOT.TLegend(0.7,0.64,0.85,0.74)
+    legend3.SetBorderSize(0)
+    legend3.SetFillStyle(0);
+    legend3.SetTextFont(42)
+    legend3.SetTextSize(0.04)
+
+
 
     pad1=ROOT.TPad("pad1", "pad1", 0, 0.315, 1, 0.99 , 0)#used for the hist plot
     pad2=ROOT.TPad("pad2", "pad2", 0, 0.0, 1, 0.305 , 0)#used for the ratio plot
@@ -183,10 +199,15 @@ def stackPlots(hists, SignalHists, Fnames, ch = "channel", reg = "region", year=
     if showData:
        legend.AddEntry(dummy,Fnames[0],'ep')
     for num in range(1,len(hists)):
-        legend.AddEntry(hists[num],Fnames[num],'F')
+        if num<(len(hists)-3):
+           legend.AddEntry(hists[num],Fnames[num],'F')
+        else:
+           legend2.AddEntry(hists[num],Fnames[num],'F')
     for H in range(len(SignalHists)):
-        legend.AddEntry(SignalHists[H], Fnames[len(hists)+H],'L')
+        legend3.AddEntry(SignalHists[H], Fnames[len(hists)+H],'L')
     legend.Draw("same")
+    legend2.Draw("same")
+    legend3.Draw("same")
 
     if (showData) and (hs.GetStack().Last().Integral()>0):
         Label_DM = ROOT.TLatex(0.2,0.75,"Data/MC = " + str(round(hists[0].Integral()/hs.GetStack().Last().Integral(),2)))
@@ -220,7 +241,7 @@ def stackPlots(hists, SignalHists, Fnames, ch = "channel", reg = "region", year=
     dummy_ratio.GetYaxis().SetTitleOffset(0.42)
     dummy_ratio.GetXaxis().SetTitleOffset(1.1)
     dummy_ratio.GetYaxis().SetNdivisions(504)    
-    dummy_ratio.GetYaxis().SetRangeUser(0.8,1.2)
+    dummy_ratio.GetYaxis().SetRangeUser(0,2)
     dummy_ratio.Divide(SumofMC)
     dummy_ratio.SetStats(ROOT.kFALSE)
     dummy_ratio.GetYaxis().SetTitle('Data/Pred.')
@@ -297,13 +318,15 @@ def compareHists(hists,Fnames, ch = "channel", reg = "region", var="sample", var
 
 #year=['2016','2017','2018','All']
 year=['2017']
-regions=["lll","lllOnZ","lllOffZ","lllB0","lllB1", "lllBgeq2", "lllMetl20", "lllMetg20", "lllMetl20Jet1B1", "lllMetl20Jet2B1", "lllMetg20Jetgeq1B0", "lllMetg20Jet1B1", "lllMetg20Jet2B1", "lllMetg20Jetgeq3B1", "lllMetg20Jetgeq2B2"]
+regions=["lll","lllOnZ","lllOffZ","lllB0","lllB1", "lllBgeq2", "lllMetl20", "lllMetg20", "lllMetg20B1", "lllMetg20Jetleq2B1", "lllMetg20Jetgeq1B0", "lllMetg20Jet1B1", "lllMetg20Jet2B1", "lllMetg20Jetgeq3B1", "lllMetg20Jetgeq2B2",  "lllDphil1p6", "lllMetg20OnZB0", "lllMetg20Jetgeq1Bleq1"]
 channels=["eee", "emul", "mumumu"];
 variables=["lep1Pt","lep1Eta","lep1Phi","lep2Pt","lep2Eta","lep2Phi","lep3Pt","lep3Eta","lep3Phi",
            "LFVePt","LFVeEta","LFVePhi","LFVmuPt","LFVmuEta","LFVmuPhi","balPt","balEta","balPhi","Topmass",
-           "llM","llPt","llDr","llDphi","jet1Pt","jet1Eta","jet1Phi","njet","nbjet","Met","MetPhi","nVtx","llMZw","LFVTopmass"]
+           "lllM","lllPt","lllHt","lllMt","jet1Pt","jet1Eta","jet1Phi","njet","nbjet","Met","MetPhi","nVtx",
+           "llZM","llZPt","llZDr","llZDphi","LFVTopmass","llM","llPt","llDr","llDphi",
+           "Ht","Ms","ZlDr","ZlDphi","JeDr","JmuDr"]
 #variables=["lep1Pt"]
-variablesName=["Leading lepton p_{T} [GeV]","Leading lepton #eta","Leading lepton #varphi","2nd-Leading lepton p_{T} [GeV]","2nd-Leading lepton #eta","2nd-Leading lepton #varphi","3rd-Leading lepton p_{T} [GeV]","3rd-Leading lepton #eta","3rd-Leading lepton #varphi","cLFV electron p_{T} [GeV]","cLFV electron #eta","cLFV electron #varphi","cLFV muon p_{T} [GeV]","cLFV muon #eta","cLFV muon #varphi","Bachelor lepton p_{T} [GeV]","Bachelor lepton #eta","Bachelor lepton #varphi","Standard top mass [GeV]","M(ll) [GeV]","p_{T}(ll) [GeV]","#Delta R(ll)","#Delta #varphi(ll)","Leading jet p_{T} [GeV]","Leading jet #eta","Leading jet #varphi","Number of jets","Number of b-tagged jets","MET [GeV]","#varphi(MET)","Number of vertices", "M(ll) (OSSF) [GeV]", "cLFV top mass [GeV]"]
+variablesName=["Leading lepton p_{T} [GeV]","Leading lepton #eta","Leading lepton #varphi","2nd-Leading lepton p_{T} [GeV]","2nd-Leading lepton #eta","2nd-Leading lepton #varphi","3rd-Leading lepton p_{T} [GeV]","3rd-Leading lepton #eta","3rd-Leading lepton #varphi","cLFV electron p_{T} [GeV]","cLFV electron #eta","cLFV electron #varphi","cLFV muon p_{T} [GeV]","cLFV muon #eta","cLFV muon #varphi","Bachelor lepton p_{T} [GeV]","Bachelor lepton #eta","Bachelor lepton #varphi","Standard top mass [GeV]","M(lll) [GeV]","p_{T}(lll) [GeV]","H_{t}(lll) [GeV]","M_{t}(lll) [GeV]","Leading jet p_{T} [GeV]","Leading jet #eta","Leading jet #varphi","Number of jets","Number of b-tagged jets","MET [GeV]","#varphi(MET)","Number of vertices", "M(ll) (OSSF) [GeV]", "p_{T}(ll) (OSSF) [GeV]", "Dr(ll) (OSSF)", "Dphi(ll) (OSSF)", "cLFV top mass [GeV]", "M(ll) (cLFV) [GeV]", "p_{T}(ll) (cLFV) [GeV]", "Dr(ll) (cLFV)", "Dphi(ll) (cLFV)", "H_{t} [GeV]", "M_{s} [GeV]", "Dr(Zl)", "Dphi(Zl)", "Dr(Je)", "Dr(Jmu)"]
 
 
 # set up an argument parser
@@ -383,3 +406,14 @@ for numreg, namereg in enumerate(regions):
                 HH.append(Hists[0][f][1][numreg][numvar])
                 HHname.append(SamplesName[f])
         compareHists(HH,HHname, 'emul', namereg,namevar,variablesName[numvar])
+
+for numreg, namereg in enumerate(regions):
+    for numvar, namevar in enumerate(variables):
+        HH=[]
+        HHname=[]
+        for f in range(len(Samples)):
+            if 'WZ' in Samples[f] or 'ZZ' in Samples[f] or 'others' in Samples[f]:
+                Hists[0][f][0][numreg][numvar].SetLineColor(colors[f])
+                HH.append(Hists[0][f][0][numreg][numvar])
+                HHname.append(SamplesName[f])
+        compareHists(HH,HHname, 'eee', namereg,namevar,variablesName[numvar])
