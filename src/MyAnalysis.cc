@@ -711,9 +711,9 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     if ((*selectedLeptons)[0]->lep_ + (*selectedLeptons)[1]->lep_ + (*selectedLeptons)[2]->lep_ == 30) ch = 2; //mumumu channel
 
     compete=false;
-    if(ch == 0 && !triggerPassEE) continue;
-    //if(ch ==1 && !triggerPassEMu) continue;
-    // For now we use ee+emu+mumu trigger for emul channel
+    if((*selectedLeptons)[0]->lep_ + (*selectedLeptons)[1]->lep_ == 2 && !triggerPassEE) continue;
+    if((*selectedLeptons)[0]->lep_ + (*selectedLeptons)[1]->lep_ == 11 && !triggerPassEMu) continue;
+    if((*selectedLeptons)[0]->lep_ + (*selectedLeptons)[1]->lep_ == 20 && !triggerPassMuMu) continue;
     if(ch == 1){
       sort(selectedLeptons_copy->begin(), selectedLeptons_copy->end(), CompareFlavourLep);
       if(ch1==0){
@@ -769,7 +769,6 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
           }
       }
     }
-    if(ch == 2 && !triggerPassMuMu) continue;
     if(ch == 0||ch == 2) sort(selectedLeptons_copy->begin(), selectedLeptons_copy->end(), CompareChargeLep);
 //jets
     selectedJets = new std::vector<jet_candidate*>();
@@ -1045,9 +1044,12 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
 //    cout<<"lep3 flavour = "<<(*selectedLeptons_copy)[2]->lep_<<" lep1 charge = "<<(*selectedLeptons_copy)[2]->charge_<<" ba = "<<(*selectedLeptons_copy)[2]->isbalep<<endl;
 //      }
 
-    if (data == "mc" && ch==0) sf_Trigger = scale_factor(&sf_triggeree_H, (*selectedLeptons)[0]->pt_, (*selectedLeptons)[1]->pt_,"");
-    if (data == "mc" && ch==1) sf_Trigger = scale_factor(&sf_triggeremu_H, (*selectedLeptons)[0]->pt_, (*selectedLeptons)[1]->pt_,"");
-    if (data == "mc" && ch==2) sf_Trigger = scale_factor(&sf_triggermumu_H, (*selectedLeptons)[0]->pt_, (*selectedLeptons)[1]->pt_,"");
+    if (data == "mc" && (*selectedLeptons)[0]->lep_ + (*selectedLeptons)[1]->lep_ == 2) {
+          sf_Trigger = scale_factor(&sf_triggeree_H, (*selectedLeptons)[0]->pt_, (*selectedLeptons)[1]->pt_,"");}
+    if (data == "mc" && (*selectedLeptons)[0]->lep_ + (*selectedLeptons)[1]->lep_ == 11) {
+          sf_Trigger = scale_factor(&sf_triggeremu_H, (*selectedLeptons)[0]->pt_, (*selectedLeptons)[1]->pt_,"");}
+    if (data == "mc" && (*selectedLeptons)[0]->lep_ + (*selectedLeptons)[1]->lep_ == 20) {
+          sf_Trigger = scale_factor(&sf_triggermumu_H, (*selectedLeptons)[0]->pt_, (*selectedLeptons)[1]->pt_,"");}
     //PU reweighting
     if (data == "mc" && year == "2016") {
         weight_PU = wPU.PU_2016(mc_trueNumInteractions,"nominal");
