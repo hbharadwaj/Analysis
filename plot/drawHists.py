@@ -109,19 +109,19 @@ def stackPlots(hists, SignalHists, Fnames, ch = "channel", reg = "region", year=
     canvas.cd()
 
     if showData:
-       legend = ROOT.TLegend(0.7,0.74,0.82,0.88)
+       legend = ROOT.TLegend(0.68,0.74,0.8,0.88)
     else:
-       legend = ROOT.TLegend(0.7,0.74,0.82,0.833)
+       legend = ROOT.TLegend(0.68,0.74,0.8,0.833)
     legend.SetBorderSize(0)
     legend.SetFillStyle(0);
     legend.SetTextFont(42)
     legend.SetTextSize(0.04)
-    legend2 = ROOT.TLegend(0.82,0.74,0.94,0.88)
+    legend2 = ROOT.TLegend(0.8,0.74,0.92,0.88)
     legend2.SetBorderSize(0)
     legend2.SetFillStyle(0);
     legend2.SetTextFont(42)
     legend2.SetTextSize(0.04)
-    legend3 = ROOT.TLegend(0.7,0.64,0.85,0.74)
+    legend3 = ROOT.TLegend(0.68,0.64,0.83,0.74)
     legend3.SetBorderSize(0)
     legend3.SetFillStyle(0);
     legend3.SetTextFont(42)

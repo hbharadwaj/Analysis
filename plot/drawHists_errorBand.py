@@ -145,6 +145,11 @@ def stackPlotsError(hists, SignalHists,error, errorRatio, Fnames, ch = "channel"
         hs.Add(hists[num])
 
     dummy = hists[0].Clone()
+    if ('emul' not in ch) or ('OnZ' in reg):
+       showData = True
+    else:
+       showData = False
+       dummy.Reset("ICE")
 
     
     canvas = ROOT.TCanvas(year+ch+reg+var,year+ch+reg+var,50,50,865,780)
@@ -152,10 +157,27 @@ def stackPlotsError(hists, SignalHists,error, errorRatio, Fnames, ch = "channel"
     canvas.SetBottomMargin(0.17)
     canvas.cd()
 
-    legend = ROOT.TLegend(0.7,0.55,0.9,0.88)
+    if showData:
+       legend = ROOT.TLegend(0.72,0.74,0.82,0.88)
+    else:
+       legend = ROOT.TLegend(0.72,0.775,0.82,0.88)
     legend.SetBorderSize(0)
+    legend.SetFillStyle(0);
     legend.SetTextFont(42)
     legend.SetTextSize(0.03)
+    legend2 = ROOT.TLegend(0.82,0.775,0.92,0.88)
+    legend2.SetBorderSize(0)
+    legend2.SetFillStyle(0);
+    legend2.SetTextFont(42)
+    legend2.SetTextSize(0.03)
+    if showData:
+       legend3 = ROOT.TLegend(0.72,0.66,0.83,0.74)
+    else:
+       legend3 = ROOT.TLegend(0.72,0.695,0.83,0.775)
+    legend3.SetBorderSize(0)
+    legend3.SetFillStyle(0);
+    legend3.SetTextFont(42)
+    legend3.SetTextSize(0.03)
 
     pad1=ROOT.TPad("pad1", "pad1", 0, 0.315, 1, 0.99 , 0)#used for the hist plot
     pad2=ROOT.TPad("pad2", "pad2", 0, 0.0, 1, 0.305 , 0)#used for the ratio plot
@@ -178,7 +200,10 @@ def stackPlotsError(hists, SignalHists,error, errorRatio, Fnames, ch = "channel"
     pad1.SetLogy(ROOT.kFALSE)
 
     y_min=0
-    y_max=1.7*dummy.GetMaximum()
+    if showData:
+       y_max=1.7*hists[0].GetMaximum()
+    else:
+       y_max=1.7*hs.GetStack().Last().GetMaximum()
     dummy.SetMarkerStyle(20)
     dummy.SetMarkerSize(1.2)
     dummy.SetTitle("")
@@ -188,6 +213,7 @@ def stackPlotsError(hists, SignalHists,error, errorRatio, Fnames, ch = "channel"
     dummy.GetYaxis().SetTitleSize(0.07)
     dummy.GetYaxis().SetLabelSize(0.04)
     dummy.GetYaxis().SetRangeUser(y_min,y_max)
+    dummy.GetYaxis().SetNoExponent()
     dummy.Draw("ex0")
     hs.Draw("histSAME")
     for H in SignalHists:
@@ -212,7 +238,7 @@ def stackPlotsError(hists, SignalHists,error, errorRatio, Fnames, ch = "channel"
     if (year == '2018'):
         Lumi = '59.97'
     label_cms="CMS Preliminary"
-    Label_cms = ROOT.TLatex(0.2,0.92,label_cms)
+    Label_cms = ROOT.TLatex(0.15,0.92,label_cms)
     Label_cms.SetNDC()
     Label_cms.SetTextFont(61)
     Label_cms.Draw()
@@ -225,16 +251,21 @@ def stackPlotsError(hists, SignalHists,error, errorRatio, Fnames, ch = "channel"
     Label_channel.SetTextFont(42)
     Label_channel.Draw("same")
 
-
-    legend.AddEntry(dummy,Fnames[0],'ep')
+    if showData:
+       legend.AddEntry(dummy,Fnames[0],'ep')
     for num in range(1,len(hists)):
-        legend.AddEntry(hists[num],Fnames[num],'F')
-    legend.AddEntry(error,'Stat. #oplus syst. ','F')
+        if num<(len(hists)-2):
+           legend.AddEntry(hists[num],Fnames[num],'F')
+        else:
+           legend2.AddEntry(hists[num],Fnames[num],'F')
+    legend2.AddEntry(error,'Stat. #oplus syst. ','F')
     for H in range(len(SignalHists)):
-        legend.AddEntry(SignalHists[H], Fnames[len(hists)+H],'L')
+        legend3.AddEntry(SignalHists[H], Fnames[len(hists)+H],'L')
     legend.Draw("same")
+    legend2.Draw("same")
+    legend3.Draw("same")
 
-    if (hs.GetStack().Last().Integral()>0):
+    if (showData) and (hs.GetStack().Last().Integral()>0):
         Label_DM = ROOT.TLatex(0.2,0.75,"Data/MC = " + str(round(hists[0].Integral()/hs.GetStack().Last().Integral(),2)))
         Label_DM.SetNDC()
         Label_DM.SetTextFont(42)
@@ -266,10 +297,12 @@ def stackPlotsError(hists, SignalHists,error, errorRatio, Fnames, ch = "channel"
     dummy_ratio.GetYaxis().SetTitleOffset(0.42)
     dummy_ratio.GetXaxis().SetTitleOffset(1.1)
     dummy_ratio.GetYaxis().SetNdivisions(504)    
-    dummy_ratio.GetYaxis().SetRangeUser(0.8,1.2)
+    dummy_ratio.GetYaxis().SetRangeUser(0,2)
     dummy_ratio.Divide(SumofMC)
     dummy_ratio.SetStats(ROOT.kFALSE)
     dummy_ratio.GetYaxis().SetTitle('Data/Pred.')
+    if not showData:
+       dummy_ratio.Reset("ICE")
     dummy_ratio.Draw('ex0')
     dummy_ratio.Draw("AXISSAMEY+")
     dummy_ratio.Draw("AXISSAMEX+")
@@ -293,10 +326,12 @@ channels=["eee", "emul", "mumumu"];
 #channels=["emu"];
 variables=["lep1Pt","lep1Eta","lep1Phi","lep2Pt","lep2Eta","lep2Phi","lep3Pt","lep3Eta","lep3Phi",
            "LFVePt","LFVeEta","LFVePhi","LFVmuPt","LFVmuEta","LFVmuPhi","balPt","balEta","balPhi","Topmass",
-           "llM","llPt","llDr","llDphi","jet1Pt","jet1Eta","jet1Phi","njet","nbjet","Met","MetPhi","nVtx","llMZw","LFVTopmass"]
+           "lllM","lllPt","lllHt","lllMt","jet1Pt","jet1Eta","jet1Phi","njet","nbjet","Met","MetPhi","nVtx",
+           "llZM","llZPt","llZDr","llZDphi","LFVTopmass","llM","llPt","llDr","llDphi",
+           "Ht","Ms","ZlDr","ZlDphi","JeDr","JmuDr"]
 #variables=["lep1Pt","lep1Eta","lep1Phi","lep2Pt","lep2Eta","lep2Phi","llM","llPt","llDr","llDphi","jet1Pt","jet1Eta","jet1Phi","njet","nbjet","Met"]
 #variables=["nbjet","Met","nVtx","llMZw"]
-variablesName=["Leading lepton p_{T} [GeV]","Leading lepton #eta","Leading lepton #varphi","2nd-Leading lepton p_{T} [GeV]","2nd-Leading lepton #eta","2nd-Leading lepton #varphi","3rd-Leading lepton p_{T} [GeV]","3rd-Leading lepton #eta","3rd-Leading lepton #varphi","cLFV electron p_{T} [GeV]","cLFV electron #eta","cLFV electron #varphi","cLFV muon p_{T} [GeV]","cLFV muon #eta","cLFV muon #varphi","Bachelor lepton p_{T} [GeV]","Bachelor lepton #eta","Bachelor lepton #varphi","Standard top mass [GeV]","M(ll) [GeV]","p_{T}(ll) [GeV]","#Delta R(ll)","#Delta #varphi(ll)","Leading jet p_{T} [GeV]","Leading jet #eta","Leading jet #varphi","Number of jets","Number of b-tagged jets","MET [GeV]","#varphi(MET)","Number of vertices", "M(ll) (z window) [GeV]", "cLFV top mass [GeV]"]
+variablesName=["Leading lepton p_{T} [GeV]","Leading lepton #eta","Leading lepton #varphi","2nd-Leading lepton p_{T} [GeV]","2nd-Leading lepton #eta","2nd-Leading lepton #varphi","3rd-Leading lepton p_{T} [GeV]","3rd-Leading lepton #eta","3rd-Leading lepton #varphi","cLFV electron p_{T} [GeV]","cLFV electron #eta","cLFV electron #varphi","cLFV muon p_{T} [GeV]","cLFV muon #eta","cLFV muon #varphi","Bachelor lepton p_{T} [GeV]","Bachelor lepton #eta","Bachelor lepton #varphi","Standard top mass [GeV]","M(lll) [GeV]","p_{T}(lll) [GeV]","H_{t}(lll) [GeV]","M_{t}(lll) [GeV]","Leading jet p_{T} [GeV]","Leading jet #eta","Leading jet #varphi","Number of jets","Number of b-tagged jets","MET [GeV]","#varphi(MET)","Number of vertices", "M(ll) (OSSF) [GeV]", "p_{T}(ll) (OSSF) [GeV]", "Dr(ll) (OSSF)", "Dphi(ll) (OSSF)", "cLFV top mass [GeV]", "M(ll) (cLFV) [GeV]", "p_{T}(ll) (cLFV) [GeV]", "Dr(ll) (cLFV)", "Dphi(ll) (cLFV)", "H_{t} [GeV]", "M_{s} [GeV]", "Dr(Zl)", "Dphi(Zl)", "Dr(Je)", "Dr(Jmu)"]
 sys = ["eleRecoSf", "eleIDSf", "muIdSf", "muIsoSf", "bcTagSF", "udsgTagSF","pu", "prefiring"]
 
 # set up an argument parser
@@ -348,7 +383,10 @@ for numyear, nameyear in enumerate(year):
                     SysDownl4=[]
                     h= Files[f].Get(namech + '_' + namereg + '_' + namevar)
                     h.SetFillColor(colors[f])
-                    h.SetLineColor(colors[f])
+                    if 'SMEFTfr' not in Samples[f]:
+                        h.SetLineColor(colors[0])
+                    else:
+                        h.SetLineColor(colors[f])
                     h.SetBinContent(h.GetXaxis().GetNbins(), h.GetBinContent(h.GetXaxis().GetNbins()) + h.GetBinContent(h.GetXaxis().GetNbins()+1))
                     l3.append(h)
                     copyl3.append(h.Clone())
