@@ -57,7 +57,7 @@ rootlib2 = subprocess.check_output("root-config --glibs", shell=True)
 rootlib22="".join([s for s in rootlib2.strip().splitlines(True) if s.strip()])
 
 dire = loc+'bin'
-dire_h = loc+'hists/'
+dire_h = '/afs/cern.ch/user/b/bharikri/Projects/TopLFV/Updated_BDT/'+'hists/'
 nf =40
 
 for key, value in SAMPLES.items():
