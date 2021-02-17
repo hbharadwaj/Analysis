@@ -94,12 +94,12 @@ public :
    Int_t           Electron_mvaFall17V1noIso_WP80[6];
    Int_t           Electron_mvaFall17V1noIso_WP90[6];
    Int_t           Electron_mvaFall17V1noIso_WPL[6];
-   Int_t           Electron_mvaFall17V2Iso_WP80[6];
-   Int_t           Electron_mvaFall17V2Iso_WP90[6];
-   Int_t           Electron_mvaFall17V2Iso_WPL[6];
-   Int_t           Electron_mvaFall17V2noIso_WP80[6];
-   Int_t           Electron_mvaFall17V2noIso_WP90[6];
-   Int_t           Electron_mvaFall17V2noIso_WPL[6];
+   Bool_t           Electron_mvaFall17V2Iso_WP80[6];
+   Bool_t           Electron_mvaFall17V2Iso_WP90[6];
+   Bool_t           Electron_mvaFall17V2Iso_WPL[6];
+   Bool_t           Electron_mvaFall17V2noIso_WP80[6];
+   Bool_t           Electron_mvaFall17V2noIso_WP90[6];
+   Bool_t           Electron_mvaFall17V2noIso_WPL[6];
    UChar_t           Electron_seedGain[6];
 
 
@@ -544,17 +544,20 @@ void MyAnalysis::Init(TTree *tree)
    //fChain->SetBranchAddress("Electron_eCorr", &Electron_eCorr, &b_Electron_eCorr);
    fChain->SetBranchAddress("Electron_phi", &Electron_phi, &b_Electron_phi);
    fChain->SetBranchAddress("Electron_pt", &Electron_pt, &b_Electron_pt);
-   /*
-   fChain->SetBranchAddress("Electron_miniPFRelIso_all", &Electron_miniPFRelIso_all, &b_Electron_miniPFRelIso_all);
-   fChain->SetBranchAddress("Electron_miniPFRelIso_chg", &Electron_miniPFRelIso_chg, &b_Electron_miniPFRelIso_chg);
-   fChain->SetBranchAddress("Electron_mvaFall17V2Iso", &Electron_mvaFall17V2Iso, &b_Electron_mvaFall17V2Iso);
-   fChain->SetBranchAddress("Electron_mvaFall17V2noIso", &Electron_mvaFall17V2noIso, &b_Electron_mvaFall17V2noIso);
-   fChain->SetBranchAddress("Electron_pfRelIso03_all", &Electron_pfRelIso03_all, &b_Electron_pfRelIso03_all);
-   fChain->SetBranchAddress("Electron_pfRelIso03_chg", &Electron_pfRelIso03_chg, &b_Electron_pfRelIso03_chg);
+   
+   // fChain->SetBranchAddress("Electron_miniPFRelIso_all", &Electron_miniPFRelIso_all, &b_Electron_miniPFRelIso_all);
+   // fChain->SetBranchAddress("Electron_miniPFRelIso_chg", &Electron_miniPFRelIso_chg, &b_Electron_miniPFRelIso_chg);
+   // fChain->SetBranchAddress("Electron_mvaFall17V2Iso", &Electron_mvaFall17V2Iso, &b_Electron_mvaFall17V2Iso);
+   // fChain->SetBranchAddress("Electron_mvaFall17V2noIso", &Electron_mvaFall17V2noIso, &b_Electron_mvaFall17V2noIso);
+   // fChain->SetBranchAddress("Electron_pfRelIso03_all", &Electron_pfRelIso03_all, &b_Electron_pfRelIso03_all);
+   // fChain->SetBranchAddress("Electron_pfRelIso03_chg", &Electron_pfRelIso03_chg, &b_Electron_pfRelIso03_chg);
    fChain->SetBranchAddress("Electron_mvaTOP", &Electron_mvaTOP, &b_Electron_mvaTOP);
    fChain->SetBranchAddress("Electron_mvaTTH", &Electron_mvaTTH, &b_Electron_mvaTTH);
-   fChain->SetBranchAddress("Electron_sip3d", &Electron_sip3d, &b_Electron_sip3d);
-   */
+   // fChain->SetBranchAddress("Electron_sip3d", &Electron_sip3d, &b_Electron_sip3d);
+   fChain->SetBranchAddress("Electron_mvaFall17V2Iso_WP80", &Electron_mvaFall17V2Iso_WP80, &b_Electron_mvaFall17V2Iso_WP80);
+   fChain->SetBranchAddress("Electron_mvaFall17V2Iso_WP90", &Electron_mvaFall17V2Iso_WP90, &b_Electron_mvaFall17V2Iso_WP90);
+   fChain->SetBranchAddress("Electron_mvaFall17V2Iso_WPL", &Electron_mvaFall17V2Iso_WPL, &b_Electron_mvaFall17V2Iso_WPL);
+   
 
    fChain->SetBranchAddress("Electron_pdgId", &Electron_pdgId, &b_Electron_pdgId);                                                                                                
    fChain->SetBranchAddress("Electron_charge", &Electron_charge, &b_Electron_charge);
@@ -578,12 +581,12 @@ void MyAnalysis::Init(TTree *tree)
    fChain->SetBranchAddress("Muon_eta", &Muon_eta, &b_Muon_eta);
    fChain->SetBranchAddress("Muon_phi", &Muon_phi, &b_Muon_phi);
   
-   /*
-   fChain->SetBranchAddress("Muon_miniPFRelIso_all", &Muon_miniPFRelIso_all, &b_Muon_miniPFRelIso_all);
+   
+   // fChain->SetBranchAddress("Muon_miniPFRelIso_all", &Muon_miniPFRelIso_all, &b_Muon_miniPFRelIso_all);
 
    fChain->SetBranchAddress("Muon_mvaTOP", &Muon_mvaTOP, &b_Muon_mvaTOP);
    fChain->SetBranchAddress("Muon_mvaTTH", &Muon_mvaTTH, &b_Muon_mvaTTH);
-   */
+   
 
    fChain->SetBranchAddress("Muon_pfRelIso04_all", &Muon_pfRelIso04_all, &b_Muon_pfRelIso04_all);
 

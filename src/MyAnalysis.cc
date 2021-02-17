@@ -221,6 +221,22 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     }
   }
 
+  typedef vector<TH1I*> Dim1I;
+  typedef vector<Dim1I> Dim2I;
+  const int numID=10;
+  Dim2I HistCounter(channels.size(),Dim1I(regions.size()));
+  TH1I *h_testI;
+  for (int i=0;i<(int)channels.size();++i){
+    for (int k=0;k<(int)regions.size();++k){
+        name<<channels[i]<<"_"<<regions[k];
+        h_testI = new TH1I((name.str()).c_str(),(name.str()).c_str(),numID,0,numID);
+        h_testI->StatOverflows(kTRUE);
+        h_testI->Sumw2(kTRUE); //! Do I need this? 
+        HistCounter[i][k] = h_testI;
+        name.str("");
+    }
+  }
+
 
   //Get scale factor and weight histograms
   TH2F  sf_Ele_Reco_H;
@@ -443,6 +459,20 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
   Long64_t nbytes = 0, nb = 0;
   Long64_t ntr = fChain->GetEntries ();
   // loop over number of entries
+for (int f=0;f<numID;f++){ // lepton ID study
+
+// |f|Electron ID|Muon ID 
+// |0|Electron\_cutBased->tight| Muon\_mvaId -> medium and Muon\_mediumId
+// |1|Electron\_mvaFall17V2Iso\_WP80| Muon\_mvaId -> medium and Muon\_mediumId
+// |2|Electron\_mvaFall17V2Iso\_WP90| Muon\_mvaId -> medium and Muon\_mediumId
+// |3|Electron\_mvaFall17V2Iso\_WPL| Muon\_mvaId -> medium and Muon\_mediumId
+// |4|Electron\_mvaTOP| Muon\_mvaId -> medium and Muon\_mediumId
+// |5|Electron\_mvaTTH| Muon\_mvaId -> medium and Muon\_mediumId
+// |6|Electron\_cutBased->tight| Muon\_mvaId->medium
+// |7|Electron\_cutBased->tight| Muon\_mvaId->tight
+// |8|Electron\_cutBased->tight| Muon\_mvaTOP
+// |9|Electron\_cutBased->tight| Muon\_mvaTTH
+
 
   
 // test on just 100 events ??? fix this!
@@ -661,7 +691,29 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
       //cout << "mass  " << Electron_mass[l] << " phi   " << Electron_phi[l] << endl  ;   
       // }
       if(elePt <20 || abs(eleEta) > 2.4 || (abs(eleEta)> 1.4442 && (abs(eleEta)< 1.566))) continue;
-      if((int) Electron_cutBased[l] < 4) continue; //  4 = tight for cut based ID
+      // if((int) Electron_cutBased[l] < 4) continue; //  4 = tight for cut based ID
+      if(f==0 && ((int) Electron_cutBased[l]!=4)){
+        continue;
+      }
+      else if(f==1 && (!Electron_mvaFall17V2Iso_WP80[l])){
+        continue;
+      }
+      else if(f==2 && (!Electron_mvaFall17V2Iso_WP90[l])){
+        continue;
+      }
+      else if(f==3 && (!Electron_mvaFall17V2Iso_WPL[l])){
+        continue;
+      }
+      else if(f==4 && ((float)Electron_mvaTOP[l]<0.8)){ // what score to choose?
+        continue;
+      }
+      else if(f==5 && ((float)Electron_mvaTTH[l]<0.8)){ // what score to choose?
+        continue;
+      }
+      else if(f>=6 && ((int) Electron_cutBased[l]!=4)){
+        continue;
+      }
+      
       selectedLeptons->push_back(new lepton_candidate(elePt,eleEta,Electron_phi[l],Electron_charge[l],l,1));
       selectedLeptons_copy->push_back(new lepton_candidate(elePt,eleEta,Electron_phi[l],Electron_charge[l],l,1));
       Ht+=((*selectedLeptons)[selectedLeptons->size()-1]->p4_).Pt();
@@ -726,9 +778,23 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
       /// https://github.com/Fedespring/cmssw/blob/3f7b3c37caeaaf058bb1c7461b9c3c91a0672f68/PhysicsTools/NanoAOD/python/muons_cff.py#L138
       //if ((!(*mu_MvaMedium)[l]) || (!(*mu_CutBasedIdMedium)[l])) continue;
       if (verbose) cout <<"  Muon_pfRelIso04_all[l] = " << Muon_pfRelIso04_all[l] <<endl; 
-      if (  (int) Muon_mvaId[l] < 2 || !(Muon_mediumId[l]) ) continue;
+      // if (  (int) Muon_mvaId[l] < 2 || !(Muon_mediumId[l]) ) continue;
 
-      
+      if(f<=5 && ((int) Muon_mvaId[l] != 2 || !(Muon_mediumId[l]))){
+        continue;
+      }
+      else if(f==6 && ((int) Muon_mvaId[l] != 2)){
+        continue;
+      }
+      else if(f==7 && ((int) Muon_mvaId[l] != 3)){
+        continue;
+      }
+      else if(f==8 && ((float)Muon_mvaTOP[l]<0.8)){// what score to choose?
+        continue;
+      }
+      else if(f==9 && ((float)Muon_mvaTTH[l]<0.8)){ // what score to choose?
+        continue;
+      }     
 
       if(Muon_pfRelIso04_all[l] > 0.15) continue;
       selectedLeptons->push_back(new lepton_candidate(muPtSFRochester * Muon_pt[l],Muon_eta[l],Muon_phi[l],Muon_charge[l],l,10));
@@ -1259,7 +1325,8 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     MET_pt0 = (MET_pt);
     float MET_phi0;
     MET_phi0 = (MET_phi);
-
+    
+  if(f==0){
     Hists[ch][0][0]->Fill((*selectedLeptons)[0]->pt_,weight_lep);
     Hists[ch][0][1]->Fill((*selectedLeptons)[0]->eta_,weight_lep);
     Hists[ch][0][2]->Fill((*selectedLeptons)[0]->phi_,weight_lep);
@@ -1307,8 +1374,10 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][0][44]->Fill(JeDr,weight_lepB);
     Hists[ch][0][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][0][46]->Fill(tM,weight_lepB);
+  }
+    HistCounter[ch][0]->AddBinContent(f+1);
 
-
+  if(f==0){
     for (int n=0;n<8;++n){
     HistsSysUp[ch][0][0][n]->Fill((*selectedLeptons)[0]->pt_,weight_lep * (sysUpWeights[n]/nominalWeights[n]));
     HistsSysUp[ch][0][1][n]->Fill((*selectedLeptons)[0]->eta_,weight_lep * (sysUpWeights[n]/nominalWeights[n]));
@@ -1406,8 +1475,10 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     HistsSysDown[ch][1][45][n]->Fill(JmuDr,weight_lepB * (sysDownWeights[n]/nominalWeights[n]));
     HistsSysDown[ch][1][46][n]->Fill(tM,weight_lepB * (sysDownWeights[n]/nominalWeights[n]));
     }
+  }
 
     if(OnZ){
+      if(f==0){
     Hists[ch][1][0]->Fill((*selectedLeptons)[0]->pt_,weight_lep);
     Hists[ch][1][1]->Fill((*selectedLeptons)[0]->eta_,weight_lep);
     Hists[ch][1][2]->Fill((*selectedLeptons)[0]->phi_,weight_lep);
@@ -1455,10 +1526,13 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][1][44]->Fill(JeDr,weight_lepB);
     Hists[ch][1][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][1][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][1]->AddBinContent(f+1);
     }
     //Off Z
 
     if(!OnZ){
+      if(f==0){
     Hists[ch][2][0]->Fill((*selectedLeptons)[0]->pt_,weight_lep);
     Hists[ch][2][1]->Fill((*selectedLeptons)[0]->eta_,weight_lep);
     Hists[ch][2][2]->Fill((*selectedLeptons)[0]->phi_,weight_lep);
@@ -1506,9 +1580,12 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][2][44]->Fill(JeDr,weight_lepB);
     Hists[ch][2][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][2][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][2]->AddBinContent(f+1);
     }
 
     if(nbjet==0 && !OnZ){
+      if(f==0){
     Hists[ch][3][0]->Fill((*selectedLeptons)[0]->pt_,weight_lepB);
     Hists[ch][3][1]->Fill((*selectedLeptons)[0]->eta_,weight_lepB);
     Hists[ch][3][2]->Fill((*selectedLeptons)[0]->phi_,weight_lepB);
@@ -1556,8 +1633,11 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][3][44]->Fill(JeDr,weight_lepB);
     Hists[ch][3][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][3][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][3]->AddBinContent(f+1);
     }
     if(nbjet==1 && !OnZ){
+      if(f==0){
     Hists[ch][4][0]->Fill((*selectedLeptons)[0]->pt_,weight_lepB);
     Hists[ch][4][1]->Fill((*selectedLeptons)[0]->eta_,weight_lepB);
     Hists[ch][4][2]->Fill((*selectedLeptons)[0]->phi_,weight_lepB);
@@ -1605,8 +1685,11 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][4][44]->Fill(JeDr,weight_lepB);
     Hists[ch][4][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][4][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][4]->AddBinContent(f+1);
     }
     if(nbjet>=2 && !OnZ){
+      if(f==0){
     Hists[ch][5][0]->Fill((*selectedLeptons)[0]->pt_,weight_lepB);
     Hists[ch][5][1]->Fill((*selectedLeptons)[0]->eta_,weight_lepB);
     Hists[ch][5][2]->Fill((*selectedLeptons)[0]->phi_,weight_lepB);
@@ -1654,8 +1737,11 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][5][44]->Fill(JeDr,weight_lepB);
     Hists[ch][5][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][5][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][5]->AddBinContent(f+1);
     }
     if(MET_pt0<20 && !OnZ){
+      if(f==0){
     Hists[ch][6][0]->Fill((*selectedLeptons)[0]->pt_,weight_lep);
     Hists[ch][6][1]->Fill((*selectedLeptons)[0]->eta_,weight_lep);
     Hists[ch][6][2]->Fill((*selectedLeptons)[0]->phi_,weight_lep);
@@ -1703,9 +1789,12 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][6][44]->Fill(JeDr,weight_lepB);
     Hists[ch][6][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][6][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][6]->AddBinContent(f+1);
     }
 
     if(MET_pt0>20 && !OnZ){
+      if(f==0){
     Hists[ch][7][0]->Fill((*selectedLeptons)[0]->pt_,weight_lep);
     Hists[ch][7][1]->Fill((*selectedLeptons)[0]->eta_,weight_lep);
     Hists[ch][7][2]->Fill((*selectedLeptons)[0]->phi_,weight_lep);
@@ -1753,9 +1842,12 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][7][44]->Fill(JeDr,weight_lepB);
     Hists[ch][7][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][7][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][7]->AddBinContent(f+1);
     }
 
     if(nbjet==1 && MET_pt0>20 && !OnZ){
+      if(f==0){
     Hists[ch][8][0]->Fill((*selectedLeptons)[0]->pt_,weight_lepB);
     Hists[ch][8][1]->Fill((*selectedLeptons)[0]->eta_,weight_lepB);
     Hists[ch][8][2]->Fill((*selectedLeptons)[0]->phi_,weight_lepB);
@@ -1803,10 +1895,13 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][8][44]->Fill(JeDr,weight_lepB);
     Hists[ch][8][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][8][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][8]->AddBinContent(f+1);
     }
 
 
     if(nbjet==1 && MET_pt0>20 && selectedJets->size()<=2 && !OnZ){
+      if(f==0){
     Hists[ch][9][0]->Fill((*selectedLeptons)[0]->pt_,weight_lepB);
     Hists[ch][9][1]->Fill((*selectedLeptons)[0]->eta_,weight_lepB);
     Hists[ch][9][2]->Fill((*selectedLeptons)[0]->phi_,weight_lepB);
@@ -1854,9 +1949,12 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][9][44]->Fill(JeDr,weight_lepB);
     Hists[ch][9][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][9][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][9]->AddBinContent(f+1);
     }
 
     if(nbjet==0 && MET_pt0>20 && selectedJets->size()>=1 && !OnZ){
+      if(f==0){
     Hists[ch][10][0]->Fill((*selectedLeptons)[0]->pt_,weight_lepB);
     Hists[ch][10][1]->Fill((*selectedLeptons)[0]->eta_,weight_lepB);
     Hists[ch][10][2]->Fill((*selectedLeptons)[0]->phi_,weight_lepB);
@@ -1904,9 +2002,12 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][10][44]->Fill(JeDr,weight_lepB);
     Hists[ch][10][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][10][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][10]->AddBinContent(f+1);
     }
 
     if(nbjet==1 && MET_pt0>20 && selectedJets->size()==1 && !OnZ){
+      if(f==0){
     Hists[ch][11][0]->Fill((*selectedLeptons)[0]->pt_,weight_lepB);
     Hists[ch][11][1]->Fill((*selectedLeptons)[0]->eta_,weight_lepB);
     Hists[ch][11][2]->Fill((*selectedLeptons)[0]->phi_,weight_lepB);
@@ -1954,9 +2055,12 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][11][44]->Fill(JeDr,weight_lepB);
     Hists[ch][11][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][11][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][11]->AddBinContent(f+1);
     }
 
     if(nbjet==1 && MET_pt0>20 && selectedJets->size()==2 && !OnZ){
+      if(f==0){
     Hists[ch][12][0]->Fill((*selectedLeptons)[0]->pt_,weight_lepB);
     Hists[ch][12][1]->Fill((*selectedLeptons)[0]->eta_,weight_lepB);
     Hists[ch][12][2]->Fill((*selectedLeptons)[0]->phi_,weight_lepB);
@@ -2004,9 +2108,12 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][12][44]->Fill(JeDr,weight_lepB);
     Hists[ch][12][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][12][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][12]->AddBinContent(f+1);
     }
 
     if(nbjet==1 && MET_pt0>20 && selectedJets->size()>=3 && !OnZ){
+      if(f==0){
     Hists[ch][13][0]->Fill((*selectedLeptons)[0]->pt_,weight_lepB);
     Hists[ch][13][1]->Fill((*selectedLeptons)[0]->eta_,weight_lepB);
     Hists[ch][13][2]->Fill((*selectedLeptons)[0]->phi_,weight_lepB);
@@ -2054,8 +2161,11 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][13][44]->Fill(JeDr,weight_lepB);
     Hists[ch][13][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][13][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][13]->AddBinContent(f+1);
     }
     if(nbjet==2 && MET_pt0>20 && selectedJets->size()>=2 && !OnZ){
+      if(f==0){
     Hists[ch][14][0]->Fill((*selectedLeptons)[0]->pt_,weight_lepB);
     Hists[ch][14][1]->Fill((*selectedLeptons)[0]->eta_,weight_lepB);
     Hists[ch][14][2]->Fill((*selectedLeptons)[0]->phi_,weight_lepB);
@@ -2103,12 +2213,15 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][14][44]->Fill(JeDr,weight_lepB);
     Hists[ch][14][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][14][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][14]->AddBinContent(f+1);
     }
 
     if(ZDphi<1.6&&ZlDphi<2.6&&nbjet==0&&
      ((*selectedLeptons_copy)[0]->p4_).Pt()+((*selectedLeptons_copy)[1]->p4_).Pt()+((*selectedLeptons_copy)[2]->p4_).Pt()>135&&
      ((*selectedLeptons_copy)[0]->p4_ + (*selectedLeptons_copy)[1]->p4_ + (*selectedLeptons_copy)[2]->p4_).M()>150&&
      ((*selectedLeptons_copy)[0]->p4_ + (*selectedLeptons_copy)[1]->p4_ + (*selectedLeptons_copy)[2]->p4_).Mt()>150){
+      if(f==0){
     Hists[ch][15][0]->Fill((*selectedLeptons)[0]->pt_,weight_lepB);
     Hists[ch][15][1]->Fill((*selectedLeptons)[0]->eta_,weight_lepB);
     Hists[ch][15][2]->Fill((*selectedLeptons)[0]->phi_,weight_lepB);
@@ -2156,9 +2269,12 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][15][44]->Fill(JeDr,weight_lepB);
     Hists[ch][15][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][15][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][15]->AddBinContent(f+1);
     }
 
     if(MET_pt0>20&&OnZ&&nbjet==0&&Zpt>40&&ZDr<2){
+      if(f==0){
     Hists[ch][16][0]->Fill((*selectedLeptons)[0]->pt_,weight_lepB);
     Hists[ch][16][1]->Fill((*selectedLeptons)[0]->eta_,weight_lepB);
     Hists[ch][16][2]->Fill((*selectedLeptons)[0]->phi_,weight_lepB);
@@ -2206,9 +2322,12 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][16][44]->Fill(JeDr,weight_lepB);
     Hists[ch][16][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][16][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][16]->AddBinContent(f+1);
     }
 
     if(MET_pt0>20&&!OnZ&&nbjet<=1&&selectedJets->size()>=1){
+      if(f==0){
     Hists[ch][17][0]->Fill((*selectedLeptons)[0]->pt_,weight_lepB);
     Hists[ch][17][1]->Fill((*selectedLeptons)[0]->eta_,weight_lepB);
     Hists[ch][17][2]->Fill((*selectedLeptons)[0]->phi_,weight_lepB);
@@ -2256,9 +2375,12 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][17][44]->Fill(JeDr,weight_lepB);
     Hists[ch][17][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][17][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][17]->AddBinContent(f+1);
     }
 
     if(MET_pt0>20&&OnZ&&nbjet<=1&&selectedJets->size()>=1){
+      if(f==0){
     Hists[ch][18][0]->Fill((*selectedLeptons)[0]->pt_,weight_lepB);
     Hists[ch][18][1]->Fill((*selectedLeptons)[0]->eta_,weight_lepB);
     Hists[ch][18][2]->Fill((*selectedLeptons)[0]->phi_,weight_lepB);
@@ -2306,6 +2428,8 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     Hists[ch][18][44]->Fill(JeDr,weight_lepB);
     Hists[ch][18][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][18][46]->Fill(tM,weight_lepB);
+      }
+      HistCounter[ch][18]->AddBinContent(f+1);
     }
       
     for (int l=0;l<(int)selectedLeptons->size();l++){
@@ -2328,20 +2452,24 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     selectedJets_copy->clear();
     selectedJets_copy->shrink_to_fit();
     delete selectedJets_copy;
-
-    nAccept++;
+    
+      if(f==0){
+        nAccept++;
+      }
+    }
   } //end of event loop
   cout<<endl<<"from "<<ntr<<" events, "<<nAccept<<" events are accepted"<<endl;
 
   for (int i=0;i<(int)channels.size();++i){
     for (int k=0;k<(int)regions.size();++k){
+      HistCounter[i][k]->Write("",TObject::kOverwrite);
       for (int l=0;l<(int)vars.size();++l){
         Hists[i][k][l]  ->Write("",TObject::kOverwrite);
         for (int n=0;n<(int)sys.size();++n){
-	  if (k==0){
+	        if (k==0){
             HistsSysUp[i][k][l][n]->Write("",TObject::kOverwrite);
             HistsSysDown[i][k][l][n]->Write("",TObject::kOverwrite);
-	  }
+	        }
         }
       }
     }
@@ -2349,11 +2477,12 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
 
   for (int i=0;i<(int)channels.size();++i){
     for (int k=0;k<(int)regions.size();++k){
+      delete HistCounter[i][k];
       for (int l=0;l<(int)vars.size();++l){
         delete Hists[i][k][l];
         for (int n=0;n<(int)sys.size();++n){
-	  delete HistsSysUp[i][k][l][n];
-	  delete HistsSysDown[i][k][l][n];
+	        delete HistsSysUp[i][k][l][n];
+	        delete HistsSysDown[i][k][l][n];
         }
       }
     }
