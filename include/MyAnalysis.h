@@ -23,6 +23,7 @@ using namespace std;
 class MyAnalysis {
 public :
    TTree          *fChain;   //!poInt_ter to the analyzed TTree or TChain
+   TEntryList     *eList;
    Int_t          fCurrent; //!current Tree number in a TChain
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
@@ -443,12 +444,12 @@ public :
    TBranch        *b_Pileup_nPU;
 
 
-   MyAnalysis(TTree *tree=0);
+   MyAnalysis(TTree *tree=0, TEntryList *list=0);
    virtual ~MyAnalysis();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
-   virtual void     Init(TTree *tree);
+   virtual void     Init(TTree *tree, TEntryList *list);
    virtual void     Loop(TString, TString, TString, TString, TString, Float_t,Float_t,Float_t);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
@@ -457,7 +458,7 @@ public :
 #endif
 
 #ifdef MyAnalysis_cxx
-MyAnalysis::MyAnalysis(TTree *tree) : fChain(0) 
+MyAnalysis::MyAnalysis(TTree *tree, TEntryList *list) : fChain(0), eList(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -469,7 +470,7 @@ MyAnalysis::MyAnalysis(TTree *tree) : fChain(0)
       f->GetObject("IIHEAnalysis",tree);
 
    }
-   Init(tree);
+   Init(tree, list);
 }
 
 MyAnalysis::~MyAnalysis()
@@ -497,7 +498,7 @@ Long64_t MyAnalysis::LoadTree(Long64_t entry)
    return centry;
 }
 
-void MyAnalysis::Init(TTree *tree)
+void MyAnalysis::Init(TTree *tree, TEntryList *list)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -512,6 +513,7 @@ void MyAnalysis::Init(TTree *tree)
    // Set branch addresses and branch poInt_ters
    if (!tree) return;
    fChain = tree;
+   eList = list;
    fCurrent = -1;
    fChain->SetMakeClass(1);
 

@@ -5,6 +5,7 @@
 #include "../include/jet_candidate.h"
 #include "TRandom.h"
 #include "TRandom3.h"
+#include "TEntryList.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -455,9 +456,9 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
   if (fname.Contains("TTTo2L2Nu")) ifTopPt=true;
 
   if (fChain == 0) return;
-  Long64_t nentries = fChain->GetEntriesFast();
+  //Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
-  Long64_t ntr = fChain->GetEntries ();
+  Long64_t ntr = eList->GetN();
   // loop over number of entries
 for (int f=0;f<numID;f++){ // lepton ID study
 
@@ -477,14 +478,13 @@ for (int f=0;f<numID;f++){ // lepton ID study
   
 // test on just 100 events ??? fix this!
   // Long64_t
-  for ( Long64_t  jentry=0; jentry<nentries;jentry++) {
+  for ( Long64_t  kentry=0; kentry<ntr;kentry++) {
     //for (Long64_t jentry=0; jentry<100;jentry++) {
+    Long64_t   jentry = eList->Next();
     Long64_t   ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
-    displayProgress(jentry, ntr) ;
-
-
+    displayProgress(kentry, ntr) ;
 
     triggerPassEE = false;
     triggerPassEMu = false;
@@ -651,16 +651,17 @@ for (int f=0;f<numID;f++){ // lepton ID study
     //cout<< "triggerPassEE" << " " << "triggerPassEMu" << "  " << "triggerPassMuMu" <<endl;
 
 
-
-    //
-    //}
+    if (verbose ) {
+    cout << ".............................................................................................." << endl;
+    cout << "event " << kentry << endl;
+    }
     if(!(triggerPassEE || triggerPassEMu || triggerPassMuMu)) continue;
     //if (verbose ) {
     //    cout<<" event passed triggers!  "<<endl;
     // }
     if(!metFilterPass) continue;
     if (verbose ) {
-        cout<<" event passed MET filters!  "<<endl;
+        cout<<" event passed Trigger & MET filters! "<<endl;
     };
 // lepton selection
   selectedLeptons = new std::vector<lepton_candidate*>();//typlical ordered by pT
@@ -669,8 +670,6 @@ for (int f=0;f<numID;f++){ // lepton ID study
   Ms=0;
 
      if (verbose ){
-     cout << ".............................................................................................." << endl;
-    cout << "event " << event << endl;   
       cout << "There are  " << nElectron << " Electrons and " << nMuon  << " Muons as well as  " <<  nJet << " Jets "<< endl ;   
       //cout << "mass of Jet 0   " << Jet_mass[0] << " phi of electron 0    " << Electron_phi[0] << endl ;   
      cout << "Electron loop begins"  << endl;   
