@@ -232,7 +232,7 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
         name<<channels[i]<<"_"<<regions[k];
         h_testI = new TH1I((name.str()).c_str(),(name.str()).c_str(),numID,0,numID);
         h_testI->StatOverflows(kTRUE);
-        h_testI->Sumw2(kTRUE); //! Do I need this? 
+        // h_testI->Sumw2(kTRUE); //! Do I need this? 
         HistCounter[i][k] = h_testI;
         name.str("");
     }
@@ -691,7 +691,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
       // }
       if(elePt <20 || abs(eleEta) > 2.4 || (abs(eleEta)> 1.4442 && (abs(eleEta)< 1.566))) continue;
       // if((int) Electron_cutBased[l] < 4) continue; //  4 = tight for cut based ID
-      if(f==0 && ((int) Electron_cutBased[l]!=4)){
+      if(f==0 && ((int) Electron_cutBased[l]<4)){
         continue;
       }
       else if(f==1 && (!Electron_mvaFall17V2Iso_WP80[l])){
@@ -779,7 +779,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
       if (verbose) cout <<"  Muon_pfRelIso04_all[l] = " << Muon_pfRelIso04_all[l] <<endl; 
       // if (  (int) Muon_mvaId[l] < 2 || !(Muon_mediumId[l]) ) continue;
 
-      if(f<=5 && ((int) Muon_mvaId[l] != 2 || !(Muon_mediumId[l]))){
+      if(f<=5 && ((int) Muon_mvaId[l] < 2 || !(Muon_mediumId[l]))){
         continue;
       }
       else if(f==6 && ((int) Muon_mvaId[l] != 2)){
