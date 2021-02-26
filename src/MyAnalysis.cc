@@ -334,6 +334,16 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
       f_triggeree->Close();
       f_triggeremu->Close();
       f_triggermumu->Close();
+
+      delete f_Ele_Reco_Map;
+      delete f_Ele_ID_Map;
+      delete f_Mu_ID_Map_1;
+      delete f_Mu_ID_Map_2;
+      delete f_Mu_ISO_Map_1;
+      delete f_Mu_ISO_Map_2;
+      delete f_triggeree;
+      delete f_triggeremu;
+      delete f_triggermumu;
     }
     if(year == "2017"){
       TFile *f_Ele_Reco_Map = new TFile(( CMSSW_BASE  + std::string("/src/data/TopLFV/input/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root")).c_str() ) ;
@@ -362,6 +372,14 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
       f_triggeree->Close();
       f_triggeremu->Close();
       f_triggermumu->Close();
+
+      delete f_Ele_Reco_Map;
+      delete f_Ele_ID_Map;
+      delete f_Mu_ID_Map;
+      delete f_Mu_ISO_Map;
+      delete f_triggeree;
+      delete f_triggeremu;
+      delete f_triggermumu;
     }
     if(year == "2018"){
       TFile *f_Ele_Reco_Map = new TFile(( CMSSW_BASE  + std::string("/src/data/TopLFV/input/egammaEffi.txt_EGM2D_updatedAll.root")).c_str() ) ;
@@ -390,7 +408,16 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
       f_triggeree->Close();
       f_triggeremu->Close();
       f_triggermumu->Close();
+
+      delete f_Ele_Reco_Map;
+      delete f_Ele_ID_Map;
+      delete f_Mu_ID_Map;
+      delete f_Mu_ISO_Map;
+      delete f_triggeree;
+      delete f_triggeremu;
+      delete f_triggermumu;
     }
+    delete f_btagEff_Map;
   }
 
   TFile file_out (fname,"RECREATE");
@@ -458,6 +485,7 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
   if (fChain == 0) return;
   //Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
+  TEntryList* temp_eList = eList;
   Long64_t ntr = eList->GetN();
   // loop over number of entries
 for (int f=0;f<numID;f++){ // lepton ID study
@@ -475,7 +503,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
 // |9|Electron\_cutBased->tight| Muon\_mvaTTH
 
 
-  
+  eList = temp_eList;
 // test on just 100 events ??? fix this!
   // Long64_t
   for ( Long64_t  kentry=0; kentry<ntr;kentry++) {
@@ -709,7 +737,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
       else if(f==5 && ((float)Electron_mvaTTH[l]<0.8)){ // what score to choose?
         continue;
       }
-      else if(f>=6 && ((int) Electron_cutBased[l]!=4)){
+      else if(f>=6 && ((int) Electron_cutBased[l]<4)){
         continue;
       }
       
@@ -782,10 +810,10 @@ for (int f=0;f<numID;f++){ // lepton ID study
       if(f<=5 && ((int) Muon_mvaId[l] < 2 || !(Muon_mediumId[l]))){
         continue;
       }
-      else if(f==6 && ((int) Muon_mvaId[l] != 2)){
+      else if(f==6 && ((int) Muon_mvaId[l] < 2)){
         continue;
       }
-      else if(f==7 && ((int) Muon_mvaId[l] != 3)){
+      else if(f==7 && ((int) Muon_mvaId[l] < 3)){
         continue;
       }
       else if(f==8 && ((float)Muon_mvaTOP[l]<0.8)){// what score to choose?
@@ -986,6 +1014,8 @@ for (int f=0;f<numID;f++){ // lepton ID study
       }
       Ht+=((*selectedJets)[selectedJets->size()-1]->p4_).Pt();
       Ms+=((*selectedJets)[selectedJets->size()-1]->p4_).M();
+
+      delete jet_temp;
     }
 
     sort(selectedJets->begin(), selectedJets->end(), ComparePtJet);
@@ -1304,6 +1334,8 @@ for (int f=0;f<numID;f++){ // lepton ID study
         if(GenPart_status[l]<30 && GenPart_status[l]>20 && GenPart_pdgId[l]==-5) ab.SetPtEtaPhiE(GenPart_pt[l], (GenPart_eta)[l], (GenPart_phi)[l], GenEnergy ) ;
       }
       weight_topPt = sqrt(topPt((wp + b).Pt()) * topPt((wm + ab).Pt()));
+
+      delete gen_temp;
     }
 
     //  \\ fix this ??? get sign of the the gen W ?
