@@ -503,7 +503,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
 // |9|Electron\_cutBased->tight| Muon\_mvaTTH
 
 
-  eList = temp_eList;
+  eList->Add(temp_eList);
   ntr = eList->GetN();
 // test on just 100 events ??? fix this!
   // Long64_t
