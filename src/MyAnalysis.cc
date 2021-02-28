@@ -485,7 +485,7 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
   if (fChain == 0) return;
   //Long64_t nentries = fChain->GetEntriesFast();
   Long64_t nbytes = 0, nb = 0;
-  TEntryList* temp_eList = eList;
+  TEntryList* temp_eList(eList);
   Long64_t ntr = eList->GetN();
   // loop over number of entries
 for (int f=0;f<numID;f++){ // lepton ID study
@@ -504,6 +504,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
 
 
   eList = temp_eList;
+  ntr = eList->GetN();
 // test on just 100 events ??? fix this!
   // Long64_t
   for ( Long64_t  kentry=0; kentry<ntr;kentry++) {
@@ -1332,10 +1333,10 @@ for (int f=0;f<numID;f++){ // lepton ID study
         if(GenPart_status[l]<30 && GenPart_status[l]>20 && GenPart_pdgId[l]==-24) wm.SetPtEtaPhiE(GenPart_pt[l], (GenPart_eta)[l], (GenPart_phi)[l], GenEnergy) ;
         if(GenPart_status[l]<30 && GenPart_status[l]>20 && GenPart_pdgId[l]==5) b.SetPtEtaPhiE(GenPart_pt[l], (GenPart_eta)[l], (GenPart_phi)[l], GenEnergy) ;
         if(GenPart_status[l]<30 && GenPart_status[l]>20 && GenPart_pdgId[l]==-5) ab.SetPtEtaPhiE(GenPart_pt[l], (GenPart_eta)[l], (GenPart_phi)[l], GenEnergy ) ;
+        delete gen_temp;
       }
       weight_topPt = sqrt(topPt((wp + b).Pt()) * topPt((wm + ab).Pt()));
 
-      delete gen_temp;
     }
 
     //  \\ fix this ??? get sign of the the gen W ?
