@@ -503,16 +503,18 @@ for (int f=0;f<numID;f++){ // lepton ID study
 // |9|Electron\_cutBased->tight| Muon\_mvaTTH
 
 
-  eList->Add(temp_eList);
+  // eList->Add(temp_eList);
+  eList = temp_eList;
   ntr = eList->GetN();
 // test on just 100 events ??? fix this!
   // Long64_t
   for ( Long64_t  kentry=0; kentry<ntr;kentry++) {
     //for (Long64_t jentry=0; jentry<100;jentry++) {
-    Long64_t   jentry = eList->Next();
+    Long64_t   jentry = fChain->GetEntryNumber(kentry);//global entry number
+    if (jentry < 0) break;
     Long64_t   ientry = LoadTree(jentry);
     if (ientry < 0) break;
-    nb = fChain->GetEntry(jentry);   nbytes += nb;
+    nb = fChain->GetEntry(jentry);   nbytes += nb;//local entry number
     displayProgress(kentry, ntr) ;
 
     triggerPassEE = false;
@@ -732,10 +734,10 @@ for (int f=0;f<numID;f++){ // lepton ID study
       else if(f==3 && (!Electron_mvaFall17V2Iso_WPL[l])){
         continue;
       }
-      else if(f==4 && ((float)Electron_mvaTOP[l]<0.8)){ // what score to choose?
+      else if(f==4 && ((float)Electron_mvaTOP[l]<0.6)){ // what score to choose?
         continue;
       }
-      else if(f==5 && ((float)Electron_mvaTTH[l]<0.8)){ // what score to choose?
+      else if(f==5 && ((float)Electron_mvaTTH[l]<0.6)){ // what score to choose?
         continue;
       }
       else if(f>=6 && ((int) Electron_cutBased[l]<4)){
@@ -817,10 +819,10 @@ for (int f=0;f<numID;f++){ // lepton ID study
       else if(f==7 && ((int) Muon_mvaId[l] < 3)){
         continue;
       }
-      else if(f==8 && ((float)Muon_mvaTOP[l]<0.8)){// what score to choose?
+      else if(f==8 && ((float)Muon_mvaTOP[l]<0.65)){// what score to choose?
         continue;
       }
-      else if(f==9 && ((float)Muon_mvaTTH[l]<0.8)){ // what score to choose?
+      else if(f==9 && ((float)Muon_mvaTTH[l]<0.65)){ // what score to choose?
         continue;
       }     
 
