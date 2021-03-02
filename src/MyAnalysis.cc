@@ -222,17 +222,15 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
     }
   }
 
-  typedef vector<TH1I*> Dim1I;
-  typedef vector<Dim1I> Dim2I;
   const int numID=10;
-  Dim2I HistCounter(channels.size(),Dim1I(regions.size()));
-  TH1I *h_testI;
+  Dim2I HistCounter(channels.size(),Dim1(regions.size()));
+  TH1F *h_testI;
   for (int i=0;i<(int)channels.size();++i){
     for (int k=0;k<(int)regions.size();++k){
         name<<channels[i]<<"_"<<regions[k];
-        h_testI = new TH1I((name.str()).c_str(),(name.str()).c_str(),numID,0,numID);
+        h_testI = new TH1F((name.str()).c_str(),(name.str()).c_str(),numID,0,numID);
         h_testI->StatOverflows(kTRUE);
-        // h_testI->Sumw2(kTRUE); //! Do I need this? 
+        h_testI->Sumw2(kTRUE); //! Do I need this? 
         HistCounter[i][k] = h_testI;
         name.str("");
     }
@@ -1409,7 +1407,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][0][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][0][46]->Fill(tM,weight_lepB);
   }
-    HistCounter[ch][0]->AddBinContent(f+1);
+    HistCounter[ch][0]->AddBinContent(f+1,weight_lep);
 
   if(f==0){
     for (int n=0;n<8;++n){
@@ -1561,7 +1559,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][1][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][1][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][1]->AddBinContent(f+1);
+      HistCounter[ch][1]->AddBinContent(f+1,weight_lep);
     }
     //Off Z
 
@@ -1615,7 +1613,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][2][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][2][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][2]->AddBinContent(f+1);
+      HistCounter[ch][2]->AddBinContent(f+1,weight_lep);
     }
 
     if(nbjet==0 && !OnZ){
@@ -1668,7 +1666,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][3][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][3][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][3]->AddBinContent(f+1);
+      HistCounter[ch][3]->AddBinContent(f+1,weight_lep);
     }
     if(nbjet==1 && !OnZ){
       if(f==0){
@@ -1720,7 +1718,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][4][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][4][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][4]->AddBinContent(f+1);
+      HistCounter[ch][4]->AddBinContent(f+1,weight_lep);
     }
     if(nbjet>=2 && !OnZ){
       if(f==0){
@@ -1772,7 +1770,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][5][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][5][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][5]->AddBinContent(f+1);
+      HistCounter[ch][5]->AddBinContent(f+1,weight_lep);
     }
     if(MET_pt0<20 && !OnZ){
       if(f==0){
@@ -1824,7 +1822,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][6][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][6][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][6]->AddBinContent(f+1);
+      HistCounter[ch][6]->AddBinContent(f+1,weight_lep);
     }
 
     if(MET_pt0>20 && !OnZ){
@@ -1877,7 +1875,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][7][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][7][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][7]->AddBinContent(f+1);
+      HistCounter[ch][7]->AddBinContent(f+1,weight_lep);
     }
 
     if(nbjet==1 && MET_pt0>20 && !OnZ){
@@ -1930,7 +1928,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][8][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][8][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][8]->AddBinContent(f+1);
+      HistCounter[ch][8]->AddBinContent(f+1,weight_lep);
     }
 
 
@@ -1984,7 +1982,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][9][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][9][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][9]->AddBinContent(f+1);
+      HistCounter[ch][9]->AddBinContent(f+1,weight_lep);
     }
 
     if(nbjet==0 && MET_pt0>20 && selectedJets->size()>=1 && !OnZ){
@@ -2037,7 +2035,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][10][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][10][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][10]->AddBinContent(f+1);
+      HistCounter[ch][10]->AddBinContent(f+1,weight_lep);
     }
 
     if(nbjet==1 && MET_pt0>20 && selectedJets->size()==1 && !OnZ){
@@ -2090,7 +2088,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][11][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][11][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][11]->AddBinContent(f+1);
+      HistCounter[ch][11]->AddBinContent(f+1,weight_lep);
     }
 
     if(nbjet==1 && MET_pt0>20 && selectedJets->size()==2 && !OnZ){
@@ -2143,7 +2141,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][12][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][12][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][12]->AddBinContent(f+1);
+      HistCounter[ch][12]->AddBinContent(f+1,weight_lep);
     }
 
     if(nbjet==1 && MET_pt0>20 && selectedJets->size()>=3 && !OnZ){
@@ -2196,7 +2194,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][13][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][13][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][13]->AddBinContent(f+1);
+      HistCounter[ch][13]->AddBinContent(f+1,weight_lep);
     }
     if(nbjet==2 && MET_pt0>20 && selectedJets->size()>=2 && !OnZ){
       if(f==0){
@@ -2248,7 +2246,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][14][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][14][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][14]->AddBinContent(f+1);
+      HistCounter[ch][14]->AddBinContent(f+1,weight_lep);
     }
 
     if(ZDphi<1.6&&ZlDphi<2.6&&nbjet==0&&
@@ -2304,7 +2302,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][15][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][15][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][15]->AddBinContent(f+1);
+      HistCounter[ch][15]->AddBinContent(f+1,weight_lep);
     }
 
     if(MET_pt0>20&&OnZ&&nbjet==0&&Zpt>40&&ZDr<2){
@@ -2357,7 +2355,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][16][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][16][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][16]->AddBinContent(f+1);
+      HistCounter[ch][16]->AddBinContent(f+1,weight_lep);
     }
 
     if(MET_pt0>20&&!OnZ&&nbjet<=1&&selectedJets->size()>=1){
@@ -2410,7 +2408,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][17][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][17][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][17]->AddBinContent(f+1);
+      HistCounter[ch][17]->AddBinContent(f+1,weight_lep);
     }
 
     if(MET_pt0>20&&OnZ&&nbjet<=1&&selectedJets->size()>=1){
@@ -2463,7 +2461,7 @@ for (int f=0;f<numID;f++){ // lepton ID study
     Hists[ch][18][45]->Fill(JmuDr,weight_lepB);
     Hists[ch][18][46]->Fill(tM,weight_lepB);
       }
-      HistCounter[ch][18]->AddBinContent(f+1);
+      HistCounter[ch][18]->AddBinContent(f+1,weight_lep);
     }
       
     for (int l=0;l<(int)selectedLeptons->size();l++){
