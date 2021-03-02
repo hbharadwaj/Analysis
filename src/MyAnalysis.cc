@@ -223,7 +223,7 @@ void MyAnalysis::Loop(TString fname, TString data, TString dataset ,TString year
   }
 
   const int numID=10;
-  Dim2I HistCounter(channels.size(),Dim1(regions.size()));
+  Dim2 HistCounter(channels.size(),Dim1(regions.size()));
   TH1F *h_testI;
   for (int i=0;i<(int)channels.size();++i){
     for (int k=0;k<(int)regions.size();++k){
